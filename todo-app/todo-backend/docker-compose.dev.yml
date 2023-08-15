@@ -1,0 +1,37 @@
+version: "3.8"
+
+services:
+  todo-backend:
+    image: todo-backend-dev
+    build:
+      context: . # The context will pick this directory as the "build context"
+      dockerfile: Dockerfile.dev # This will simply tell which Dockerfile to read
+    volumes:
+      - ./:/usr/src/app # The path can be relative, so ./ is enough to say "the same location as the docker-compose.yml"
+    ports:
+      - 4000:4000
+    container_name: todo-backend-dev # This will name the container hello-front-dev
+    environment:
+      - MONGO_URL=mongodb://the_username:the_password@mongo:27017/the_database
+      - REDIS_URL=redis://redis:6379
+  mongo:
+    image: mongo
+    ports:
+      - 27017:27017
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: example
+      MONGO_INITDB_DATABASE: the_database
+    volumes:
+      - ./mongo/mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js
+      - ./mongo_data:/data/db
+  redis:
+    image: docker.io/bitnami/redis:7.0
+    environment:
+      # ALLOW_EMPTY_PASSWORD is recommended only for development.
+      - ALLOW_EMPTY_PASSWORD=yes
+      - REDIS_DISABLE_COMMANDS=FLUSHDB,FLUSHALL
+    ports:
+      - "6379:6379"
+    volumes:
+      - ./redis_data:/bitnami/redis/data
